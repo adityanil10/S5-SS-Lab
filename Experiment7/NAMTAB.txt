@@ -1,0 +1,2 @@
+NAMTAB.txt
+EX1
