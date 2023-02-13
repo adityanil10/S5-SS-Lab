@@ -1,0 +1,485 @@
+ADDITION OF 16BIT number
+
+2000 MOV SI,3000
+2003 MOV DI,4000
+2006 MOV AX,[SI]
+2008 INC SI
+2009 INC SI
+200A MOV BX,[SI]
+200C ADD AX,BX
+200E JNC 2015
+2010 MOV [DI],0001
+2013 JMP 2018
+2015 MOV [DI],0000
+2018 INC DI
+2019 MOV [DI],AX
+201B HLT
+
+
+SUBTRACTION OF 16BIT number
+
+2000 MOV SI,3000
+2003 MOV DI,4000
+2006 MOV AX,[SI]
+2008 INC SI
+2009 INC SI
+200A MOV BX,[SI]
+200C CMP AX,BX
+200E JC 2017
+2010 SUB AX,BX
+2012 MOV [DI],0000
+2015 JMP 2022
+2017 MOV CX,AX
+2019 MOV AX,BX
+201B MOV BX,CX
+201D MOV AX,BX
+201F MOV [DI],0001
+2022 INC DI
+2023 MOV [DI],AX
+2025 HLT
+
+sorting number in ascending
+
+2000 MOV SI,3000
+2003 MOV CL,[SI]
+2005 DEC CL
+2006 MOV SI,3000
+3009 MOV CH,[SI]
+200B DEC CH
+200C INC SI
+200D MOV AL,[SI]
+200F INC SI
+2010 CMP AL,[SI]
+2012 JC 201A
+2014 XCHG AL,[SI]
+2016 DEC SI
+2017 XCHG AL,[SI]
+2019 INC SI
+201A DEC CH
+201B JNZ 200D
+201D DEC CL
+201E JNZ 2006
+2020 HLT
+
+
+EVEN OR ODD
+
+2000 MOV SI,3000
+2003 MOV DI,4000
+2006 MOV AX,[SI]
+2008 MOV BX,0002
+200B MOV DX,0000
+200E DIV BX
+2010 CMP DX,0000
+2014 JG 201B
+2016 MOV [DI],0E
+2019 JMP 201E
+201B MOV[DI],00
+201E HLT
+
+
+FIND LARGEST
+
+2000 MOV SI,3000
+2003 MOV CX,0005
+2006 MOV AL,[SI]
+2008 DEC CX
+2009 INC SI
+200A CMP AL,[SI]
+200C JNC 2010
+200E MOV AL,[SI]
+2010 DEC CX
+2011 JNZ 2009
+2013 MOV [3005],AL
+2016 HLT
+
+
+2000 MOV SI,3000
+2003 mov CX,[SI]
+2005 inc SI
+2006 MOV AL,[SI] 
+2008 INC SI
+2009 MOV BL,[SI]
+200B CMP AL,BL
+200D JNZ 2017
+200F MOV DI,3007
+2012 MOV [DI], 01
+2015 JMP 2019
+2017 LOOP 2008
+2019 HLT
+
+8086 EMU
+TO SEARCH number
+DATA SEGMENT
+    STRING1 DB 11H,22H,33H,44H,55H
+    MSG1 DB "FOUND$"
+    MSG2 DB "NOT FOUND$"
+    SE DB 33H
+DATA ENDS 
+
+PRINT MACRO MSG
+    MOV AH, 09H
+    LEA DX, MSG
+    INT 21H
+    INT 03H
+ENDM   
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+    START:
+    MOV AX, DATA
+    MOV DS, AX
+    MOV AL, SE
+    LEA SI, STRING1
+    MOV CX, 04H   
+    MOV DX,0000H
+    UP:
+    MOV BL,[SI]
+    CMP AL, BL
+    JZ FO
+    INC SI
+    DEC CX
+    JNZ UP
+    JMP END1
+    FO:  
+    INC DX
+    END1:
+    INT 03H
+CODE ENDS
+END START
+
+
+
+
+PALINDROME
+
+DATA SEGMENT
+    BLOCK1 DB 'MALAYALAM'
+    PAL DB 00H
+    
+DATA ENDS
+
+EXTRA SEGMENT
+    BLOCK2 DB 9 DUP(?) 
+EXTRA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA, ES:EXTRA
+    START:
+    MOV AX,DATA
+    MOV DS,AX
+    MOV AX,EXTRA
+    MOV ES,AX
+    LEA SI,BLOCK1
+    LEA DI,BLOCK2+08H  
+    MOV CX,0009H
+    BACK:
+    CLD
+    LODSB
+    STD
+    STOSB
+    LOOP BACK
+    LEA SI,BLOCK1
+    LEA DI,BLOCK2 
+    MOV CX,0009H
+    CLD
+    REPZ CMPSB
+    JNZ SKIP
+    MOV PAL,01H
+    SKIP:
+    INT 03H
+CODE ENDS
+END START
+
+
+
+
+data segment
+        msg1 db 0ah,0dh,"Enter the string : $"
+        msg2 db 0ah,0dh,"Is a pallindrome $"
+        msg3 db 0ah,0dh,"Is not a pallindrome $"
+        n db 09h dup(?)
+data ends
+code segment
+        assume cs:code,ds:data
+        start: mov ax,data
+               mov ds,ax
+                                            
+                                            
+               ;Getting offset of array
+               lea si,n
+               lea di,n
+
+               ;Printing message1
+               lea dx,msg1
+               mov ah,09h
+               int 21h
+
+               mov cl,00h
+               ;Reading string
+          scan:mov ah,01h
+               int 21h
+
+               cmp al,0dh
+               jz ended
+               mov [si],al
+               inc cl
+               inc si
+               jmp scan
+
+         ended:
+               dec si
+               mov bl,[si]
+               cmp [di],bl
+               jnz notpal
+               inc di
+               dec cl
+               jnz ended
+
+
+          pal:
+               ;Printing pallindrom
+               lea dx,msg2
+               mov ah,09h
+               int 21h
+               jmp stoped
+
+       notpal: ;Printing not pallindrom
+               lea dx,msg3
+               mov ah,09h
+               int 21h
+          
+         stoped:
+                mov ah,4ch
+                int 21h
+
+
+code ends
+end start
+
+
+
+16BIT addition
+DATA SEGMENT
+    MSG1 DB 0AH,0DH,"ENTER FIRST NUMBER: $"
+    MSG2 DB 0AH,0DH,"ENTER SECOND NUMBER: $"
+    MSG3 DB 0AH,0DH,"SUM IS: $"
+DATA ENDS
+
+CODE SEGMENT 
+    
+    START:
+    ASSUME CS:CODE,DS:DATA
+    MOV AX,DATA
+    MOV DS,AX
+    
+    LEA DX,MSG1
+    MOV AH,09H
+    INT 21H
+    
+    MOV AH,01H
+    INT 21H
+    MOV BH,AL
+    
+    MOV AH,01H
+    INT 21H
+    MOV BL,AL
+    
+    LEA DX,MSG2
+    MOV AH,09H
+    INT 21H
+    
+    MOV AH,01H
+    INT 21H
+    MOV CH,AL
+    
+    MOV AH,01H
+    INT 21H
+    MOV CL,AL
+    
+    MOV AL,BL
+    MOV AH,00H
+    ADD AL,CL
+    AAA  
+    ADD AX,3030H
+    
+    MOV BL,AL
+    MOV AL,AH
+    MOV AH,00H
+    ADD AL,BH
+    ADD AL,CH
+    
+    AAA
+    
+    ADD AX,3030H
+    
+    MOV BH,AL
+    MOV CL,AH
+    
+    LEA DX,MSG3
+    MOV AH,09H
+    INT 21H  
+    
+    MOV DL,CL
+    MOV AH,02H
+    INT 21H
+    
+    MOV DL,BH
+    MOV AH,02H
+    INT 21H
+    
+    MOV DL,BL
+    MOV AH,02H
+    INT 21H
+    
+    k	
+    
+CODE ENDS
+END START
+    
+
+
+DATA SEGMENT
+    MSG1 DB 0AH,0DH,"ENTER FIRST NUMBER: $"
+    MSG2 DB 0AH,0DH,"ENTER SECOND NUMBER: $"
+    MSG3 DB 0AH,0DH,"DIFFERENCE IS: $"
+    MSG4 DB 0AH,0DH,"DIFFERENCE IS NEGATIVE: $"
+DATA ENDS
+
+CODE SEGMENT 
+    
+    START:
+    ASSUME CS:CODE,DS:DATA
+    MOV AX,DATA
+    MOV DS,AX
+    
+    LEA DX,MSG1
+    MOV AH,09H
+    INT 21H
+    
+    MOV AH,01H
+    INT 21H
+    MOV BH,AL
+    
+    MOV AH,01H
+    INT 21H
+    MOV BL,AL
+    
+    LEA DX,MSG2
+    MOV AH,09H
+    INT 21H
+    
+    MOV AH,01H
+    INT 21H
+    MOV CH,AL
+    
+    MOV AH,01H
+    INT 21H
+    MOV CL,AL
+    
+    
+    
+CODE ENDS
+END START
+    
+
+
+//prime no prime
+
+DATA SEGMENT
+    MSG DB "The Give No is a Prime No$"
+    NMSG DB "The Given No is not a Prime No$"
+    NUM DB 20H
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE,DS:DATA
+    
+    START:
+    MOV AX,DATA
+    MOV DS,AX
+    MOV AL,NUM 
+    MOV AH,00H
+    MOV BX,0002H
+    MOV DX,0000H
+    
+    L1: 
+    
+    MOV DX,0000H
+    DIV BX
+    CMP DX,0000H
+    JZ NOTPRIME 
+    MOV AL,NUM
+    MOV AH,00H
+    INC BX
+    CMP BX,AX  
+    JNZ L1
+    
+    LEA DX,MSG
+    MOV AH,09H
+    INT 21H
+    JMP TOEND
+      
+    NOTPRIME:
+    LEA DX,NMSG
+    MOV AH,09H
+    INT 21H
+             
+             
+    TOEND:
+    MOV AH,4CH
+    INT 21H
+    
+CODE ENDS
+END START
+    
+
+
+//REVERSING STRING
+
+DATA SEGMENT
+    STRING1 DB "ENTER"
+DATA ENDS   
+
+EXTRA SEGMENT
+    STRING2 DB 9 DUP(?)
+EXTRA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE,DS:DATA,ES:EXTRA
+    
+    START:
+    MOV AX,DATA
+    MOV DS,AX
+    
+    MOV AX,EXTRA
+    MOV ES,AX
+    
+    LEA SI,STRING1+04H
+    LEA DI,STRING2  
+    
+    MOV CX,0005H
+    
+    BACK:
+    STD
+    LODSB
+    CLD
+    STOSB  
+    LOOP BACK  
+    
+             
+    TOEND:
+    MOV AH,4CH
+    INT 21H
+    
+CODE ENDS
+END START
+    
+    
+    
+    
+    
+    
+    
+    
+    
